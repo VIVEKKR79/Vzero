@@ -3,10 +3,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import { hanndleError, hanndleSuccess } from '../../utils'
 
-function Signup() {
+function Login() {
      
-    const [signupInfo,  setSignupInfo] = useState({
-        name: "",
+    const [loginInfo,  setLoginInfo] = useState({
         email: "",
         password: "",
     })
@@ -17,38 +16,39 @@ function Signup() {
 
         const {name, value} = event.target;
         console.log(name, value);
-        setSignupInfo({ ...signupInfo, [name]: value });
+        setLoginInfo({ ...loginInfo, [name]: value });
     }
 
-    console.log('signup Info', signupInfo);
+    console.log('signup Info', loginInfo);
 
     const handleSubmit = async(event) =>{
         event.preventDefault();
-        const {name, email, password} = signupInfo;
-        if(!name || !email || !password){
-            return hanndleError("name, password, eamil are required")
+        const {email, password} = loginInfo;
+        if(!email || !password){
+            return hanndleError("password, eamil are required")
         }
 
         try{
 
-            const url = "https://zerodha-31vm.onrender.com/auth/signup";
+            const url = "https://zerodha-31vm.onrender.com/auth/login";
             const response = await fetch(url, { 
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body:JSON.stringify(signupInfo),
+                body:JSON.stringify(loginInfo),
             })
 
             const result = await response.json();
-            const { success, message, error } = result;
+            const { success, message, error, name, jwtToken } = result;
 
             if(success){
                 hanndleSuccess(message);
+                localStorage.setItem('token', jwtToken);
+                localStorage.setItem("loggedInUser", name);
                 setTimeout(()=>{
 
-                   navigate('/signup/login');
-
+                    window.location.href = "https://zerodha-dashboard-peach.vercel.app/";
                 }, 1000)
             }else if(error){
                 const err = error[0];
@@ -70,18 +70,9 @@ function Signup() {
   return (
     <div className='form-main-container'>
       <div className="form_container">
-        <h2>Signup Account</h2>
+        <h2>Login Account</h2>
         <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="name">Name</label>
-            <input
-              onChange={handleChange}
-              type="text"
-              name="name"
-              placeholder="Enter your username"
-              value={signupInfo.name}
-            />
-          </div>
+          
           <div>
             <label htmlFor="email">Email</label>
             <input
@@ -89,7 +80,7 @@ function Signup() {
               type="email"
               name="email"
               placeholder="Enter your email"
-              value={signupInfo.email}
+              value={loginInfo.email}
             />
           </div>
           <div>
@@ -99,12 +90,12 @@ function Signup() {
               type="password"
               name="password"
               placeholder="Enter your password"
-              value={signupInfo.password}
+              value={loginInfo.password}
             />
           </div>
           <button type="submit">Submit</button>
           <span>
-            Already have an account? <Link to={'/signup/login'}>Login</Link>
+          Create a new account <Link to={"/signup/signup"}>Signup</Link>
           </span>
         </form>
       </div>
@@ -113,4 +104,4 @@ function Signup() {
   )
 }
 
-export default Signup
+export default Login
